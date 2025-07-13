@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English to Indian Languages Translator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(-45deg, #ff7e5f, #feb47b, #ff6b6b, #ffa3a3, #a18cd1, #fbc2eb, #a6c1ee, #8fd3f4);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .script-characters {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .character {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.15;
+            animation: float 20s linear infinite;
+            user-select: none;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg) scale(0.5);
+            }
+
+            100% {
+                transform: translateY(-20vh) rotate(360deg) scale(1.5);
+            }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            margin: 12px 0;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: #3e8e41;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 16px;
+            background-color: rgba(249, 249, 249, 0.7);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 16px;
+            min-height: 60px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="gradient-bg"></div>
+    <div class="script-characters" id="scriptChars"></div>
+
+    <div class="container">
+        <h1>English to Indian Languages Translator</h1>
+        <textarea id="englishText" placeholder="Enter text in English..."></textarea>
+
+        <select id="languageSelect">
+            <option value="hi">Hindi</option>
+            <option value="bn">Bengali</option>
+            <option value="te">Telugu</option>
+            <option value="mr">Marathi</option>
+            <option value="ta">Tamil</option>
+            <option value="ur">Urdu</option>
+            <option value="gu">Gujarati</option>
+            <option value="ml">Malayalam</option>
+            <option value="kn">Kannada</option>
+            <option value="pa">Punjabi</option>
+        </select>
+
+        <button onclick="translateText()">Translate</button>
+        <div id="output" class="output"></div>
+        <button onclick="speakTranslation()">🔊 Speak Translation</button>
+        <button onclick="feedback()">Feedback</button>
+        
+    </div>
+
+    <script>
+        // Floating characters
+        document.addEventListener('DOMContentLoaded', function () {
+            const scripts = [
+                "क", "ख", "ग", "घ", "ङ", "च", "छ", "ज", "झ", "ञ",
+                "ক", "খ", "গ", "ঘ", "ঙ", "চ", "ছ", "জ", "ঝ", "ঞ",
+                "క", "ఖ", "గ", "ఘ", "ఙ", "చ", "ఛ", "జ", "ఝ", "ఞ",
+                "க", "ங", "ச", "ஜ", "ஞ", "ட", "ண", "த", "ந", "ன",
+                "ક", "ખ", "ગ", "ઘ", "ઙ", "ચ", "છ", "જ", "ઝ", "ઞ",
+                "ക", "ഖ", "ഗ", "ഘ", "ങ", "ച", "ഛ", "ജ", "ഝ", "ഞ",
+                "ਕ", "ਖ", "ਗ", "ਘ", "ਙ", "ਚ", "ਛ", "ਜ", "ਝ", "ਞ"
+            ];
+
+            const container = document.getElementById('scriptChars');
+
+            for (let i = 0; i < 50; i++) {
+                const char = document.createElement('div');
+                char.className = 'character';
+                char.textContent = scripts[Math.floor(Math.random() * scripts.length)];
+                char.style.left = Math.random() * 100 + 'vw';
+                char.style.animationDuration = 15 + Math.random() * 25 + 's';
+                char.style.animationDelay = Math.random() * 10 + 's';
+                char.style.fontSize = (20 + Math.random() * 20) + 'px';
+                char.style.opacity = 0.1 + Math.random() * 0.15;
+                container.appendChild(char);
+            }
+        });
+
+        async function translateText() {
+            const text = document.getElementById('englishText').value;
+            const selectedLanguage = document.getElementById('languageSelect').value;
+
+            if (text === "") {
+                alert("Please enter some text to translate!");
+                return;
+            }
+
+            const output = document.getElementById('output');
+            output.innerHTML = '<div style="text-align:center;color:#666">Translating...</div>';
+
+            try {
+                const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${selectedLanguage}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                output.innerText = data.responseData.translatedText;
+            } catch (error) {
+                console.error('Error translating text:', error);
+                output.innerHTML = '<div style="color:#e74c3c">Translation error. Please try again.</div>';
+            }
+        }
+
+        function speakTranslation() {
+            const text = document.getElementById('output').innerText;
+            if (!text.trim()) {
+                alert("No translation available to speak.");
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = detectLangFromText(text);
+            speechSynthesis.speak(utterance);
+        }
+
+        function detectLangFromText(text) {
+            const codeMap = {
+                'क': 'hi-IN',
+                'ক': 'bn-IN',
+                'క': 'te-IN',
+                'ம': 'ta-IN',
+                'گ': 'ur-PK',
+                'ક': 'gu-IN',
+                'ക': 'ml-IN',
+                'ಕ': 'kn-IN',
+                'ਜ': 'pa-IN'
+            };
+            for (let key in codeMap) {
+                if (text.includes(key)) return codeMap[key];
+            }
+            return 'hi-IN'; // default
+        }
+
+        function feedback() {
+            // Open feedback form in a new window
+            window.open('http://localhost/feedback_form/index.html', '_blank', 'width=500,height=600,scrollbars=yes,resizable=yes');
+        }
+    </script>
+
+</body>
+
+</html> 
